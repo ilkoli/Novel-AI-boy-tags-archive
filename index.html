@@ -112,7 +112,8 @@ main{padding:24px 0}
     <div class="controls">
       <input class="q" id="q" placeholder="검색" />
       <select class="sort" id="sort">
-        <option value="original">오래된 순</option>
+        <option value="original">등록순</option>
+        <option value="newest">최신순</option>
         <option value="titleAsc">제목 A→Z</option>
         <option value="titleDesc">제목 Z→A</option>
       </select>
@@ -178,10 +179,19 @@ function render(list){
 function sortItems(list,mode){
   const favs=get(),fa=[],na=[];
   list.forEach(i=>(favs.has(i.id)?fa:na).push(i));
-  const cmp=(a,b)=>a.title.localeCompare(b.title,'ko',{numeric:true,sensitivity:'base'});
-  const orig=(a,b)=>idx.get(a.id)-idx.get(b.id);
-  const sort=arr=>mode==='original'?arr.sort(orig):mode==='titleAsc'?arr.sort(cmp):mode==='titleDesc'?arr.sort((a,b)=>cmp(b,a)):arr;
-  return[...sort(fa),...sort(na)];
+
+  const byTitle = (a,b)=>a.title.localeCompare(b.title,'ko',{numeric:true,sensitivity:'base'});
+  const byOld   = (a,b)=>idx.get(a.id)-idx.get(b.id); // 등록순(오래된→최근)
+  const byNew   = (a,b)=>idx.get(b.id)-idx.get(a.id); // 최신순(최근→오래된)
+
+  const apply = (arr)=>
+    mode==='original' ? arr.sort(byOld) :
+    mode==='newest'   ? arr.sort(byNew) :
+    mode==='titleAsc' ? arr.sort(byTitle) :
+    mode==='titleDesc'? arr.sort((a,b)=>byTitle(b,a)) :
+    arr;
+
+  return [...apply(fa), ...apply(na)];
 }
 
 function filter(list,k){
