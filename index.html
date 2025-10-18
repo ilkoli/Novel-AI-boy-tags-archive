@@ -13,6 +13,14 @@
     .title{display:flex;align-items:center;gap:10px}
     .title h1{margin:0;font-size:20px;font-weight:700}
     .desc{margin-top:8px;color:var(--muted);font-size:14px;line-height:1.6}
+
+    /* 토글 블록 */
+    .toggle{margin-top:10px;padding:12px 14px;background:var(--panel);border:1px solid #2a2f3b;border-radius:10px}
+    .toggle summary{cursor:pointer;font-weight:600;color:var(--accent);list-style:none;outline:none}
+    .toggle summary::-webkit-details-marker{display:none}
+    .toggle[open]{box-shadow:0 0 0 2px rgba(113,201,248,.08) inset}
+    .toggle p{margin:10px 0 0;font-size:14px;color:var(--muted);line-height:1.6}
+
     .controls{display:grid;gap:10px;margin-top:20px;grid-template-columns:1fr;grid-template-areas:"q" "sort" "reset"}
     .controls .q{grid-area:q}
     .controls .sort{grid-area:sort}
@@ -21,6 +29,7 @@
     .controls input::placeholder{color:var(--muted)}
     .controls button{cursor:pointer;border-color:#2f3b47}
     @media(min-width:700px){.controls{grid-template-columns:1fr 180px 140px;grid-template-areas:"q sort reset"}}
+
     main{padding:24px 0}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
     @media(max-width:640px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -44,26 +53,37 @@
   <header>
     <div class="wrap">
       <div class="title">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l2.39 4.84 5.34.78-3.86 3.76.91 5.31L12 15.77 6.22 17.7l.91-5.31L3.27 8.62l5.34-.78L12 3z" stroke="#71c9f8"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l2.39 4.84 5.34.78-3.86 3.76.91 5.31L12 15.77 6.22 17.7l.91-5.31L3.27 8.62l5.34-.78L12 3z" stroke="#71c9f8"/></svg>
         <h1>Novel AI 남캐 태그 아카이브</h1>
       </div>
+
       <p class="desc">
         남성 캐릭터 작가 태그 샘플 아카이브입니다.<br>
-        각 카드의 '복사' 버튼을 눌러 태그 복사가 가능합니다.<br>
-        <br>
-        【사용 모델】<br>
-        NAI Diffusion V4.5 Full<br>
-        Steps: 28<br>
-        Prompt Guidance: 7<br>
-        Sampler: Euler<br>
-        Quality Tags: Enabled<br>
-        Prompt Guidance Rescale: 0<br>
-        Noise Schedule: expotential<br>
-        <br>
-        【공통 적용 태그】<br>
-        posivive: 1boy, solo, adult, fully clothed, looking at viewer, cowboy shot<br>
-        negative: girl, cowboy
+        각 카드의 ‘복사’ 버튼으로 태그를 바로 복사할 수 있어요.
       </p>
+
+      <!-- 토글 섹션들 -->
+      <details class="toggle">
+        <summary>🧩 사용 모델 보기</summary>
+        <p>
+          NAI Diffusion V4.5 Full<br>
+          Steps: 28<br>
+          Prompt Guidance: 7<br>
+          Sampler: Euler<br>
+          Quality Tags: Enabled<br>
+          Prompt Guidance Rescale: 0<br>
+          Noise Schedule: exponential
+        </p>
+      </details>
+
+      <details class="toggle">
+        <summary>🏷️ 공통 적용 태그 보기</summary>
+        <p>
+          positive: 1boy, solo, adult, fully clothed, looking at viewer, cowboy shot<br>
+          negative: girl, cowboy
+        </p>
+      </details>
+
       <div class="controls">
         <input class="q" id="q" placeholder="검색" />
         <select class="sort" id="sort">
@@ -90,17 +110,62 @@
       {id:'img-003',title:'Forest Shrine',img:'https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop',copyText:'Forest Shrine'},
       {id:'img-004',title:'Harbor Night',img:'https://images.unsplash.com/photo-1505765050516-f72dcac9c60e?q=80&w=800&auto=format&fit=crop',copyText:'Harbor Night'}
     ];
-    const g=document.getElementById('grid'),e=document.getElementById('empty'),q=document.getElementById('q'),s=document.getElementById('sort'),r=document.getElementById('reset'),t=document.getElementById('toast');
+
+    const g=document.getElementById('grid'),e=document.getElementById('empty'),q=document.getElementById('q'),
+          s=document.getElementById('sort'),r=document.getElementById('reset'),t=document.getElementById('toast');
+
     const st=(()=>{try{const k='__chk__';localStorage.setItem(k,'1');localStorage.removeItem(k);return localStorage}catch(e){let m={};return{getItem:k=>m[k]||null,setItem:(k,v)=>m[k]=v,removeItem:k=>delete m[k]}}})();
     const K='gallery:favorites',parse=s=>{try{return JSON.parse(s)}catch{return[]}},get=()=>new Set(parse(st.getItem(K)||'[]')),set=v=>st.setItem(K,JSON.stringify([...v]));
     const idx=new Map(items.map((it,i)=>[it.id,i]));
-    function render(list){const favs=get();g.innerHTML='';list.forEach(it=>{const c=document.createElement('article');c.className='card'+(favs.has(it.id)?' isFav':'');c.innerHTML=`<button class="favBtn" aria-pressed="${favs.has(it.id)}" data-id="${it.id}"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button><img class="thumb" src="${it.img}" alt="${it.title}"/><button class="copyBtn" data-clip="${it.copyText}">복사</button><div class="meta"><div class="name">${it.title}</div></div>`;g.appendChild(c)});e.hidden=list.length!==0;}
-    function sortItems(list,mode){const favs=get(),fa=[],na=[];list.forEach(i=>(favs.has(i.id)?fa:na).push(i));const cmp=(a,b)=>a.title.localeCompare(b.title,'ko',{numeric:true,sensitivity:'base'}),orig=(a,b)=>idx.get(a.id)-idx.get(b.id),sort=arr=>mode==='original'?arr.sort(orig):mode==='titleAsc'?arr.sort(cmp):mode==='titleDesc'?arr.sort((a,b)=>cmp(b,a)):arr;return[...sort(fa),...sort(na)];}
-    function filter(list,k){const kw=k.toLowerCase().trim();return kw?list.filter(i=>i.title.toLowerCase().includes(kw)):list;}
-    async function copyTx(tx){try{await navigator.clipboard.writeText(tx);toast('복사 완료!')}catch{toast('복사 실패')}}function toast(m){t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1200);}
-    g.addEventListener('click',ev=>{const b=ev.target.closest('.copyBtn');if(b){copyTx(b.dataset.clip);return}const s=ev.target.closest('.favBtn');if(s){const f=get(),id=s.dataset.id;f.has(id)?f.delete(id):f.add(id);set(f);sync()}});
-    q.addEventListener('input',sync);s.addEventListener('change',sync);r.addEventListener('click',()=>{q.value='';s.value='original';sync()});
-    function sync(){render(sortItems(filter(items,q.value),s.value))}sync();
+
+    function render(list){
+      const favs=get();
+      g.innerHTML='';
+      list.forEach(it=>{
+        const c=document.createElement('article');
+        c.className='card'+(favs.has(it.id)?' isFav':'');
+        c.innerHTML=`
+          <button class="favBtn" aria-pressed="${favs.has(it.id)}" data-id="${it.id}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          </button>
+          <img class="thumb" src="${it.img}" alt="${it.title}"/>
+          <button class="copyBtn" data-clip="${it.copyText}">복사</button>
+          <div class="meta"><div class="name">${it.title}</div></div>`;
+        g.appendChild(c);
+      });
+      e.hidden = list.length !== 0;
+    }
+
+    function sortItems(list,mode){
+      const favs=get(),fa=[],na=[];
+      list.forEach(i=>(favs.has(i.id)?fa:na).push(i));
+      const cmp=(a,b)=>a.title.localeCompare(b.title,'ko',{numeric:true,sensitivity:'base'});
+      const orig=(a,b)=>idx.get(a.id)-idx.get(b.id);
+      const sort=arr=>mode==='original'?arr.sort(orig):mode==='titleAsc'?arr.sort(cmp):mode==='titleDesc'?arr.sort((a,b)=>cmp(b,a)):arr;
+      return[...sort(fa),...sort(na)];
+    }
+
+    function filter(list,k){
+      const kw=k.toLowerCase().trim();
+      return kw?list.filter(i=>i.title.toLowerCase().includes(kw)):list;
+    }
+
+    async function copyTx(tx){
+      try{await navigator.clipboard.writeText(tx);toast('복사 완료!')}
+      catch{toast('복사 실패')}
+    }
+    function toast(m){t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1200);}
+
+    g.addEventListener('click',ev=>{
+      const b=ev.target.closest('.copyBtn'); if(b){copyTx(b.dataset.clip);return}
+      const star=ev.target.closest('.favBtn'); if(star){const f=get(),id=star.dataset.id;f.has(id)?f.delete(id):f.add(id);set(f);sync()}
+    });
+    q.addEventListener('input',sync);
+    s.addEventListener('change',sync);
+    r.addEventListener('click',()=>{q.value='';s.value='original';sync()});
+
+    function sync(){render(sortItems(filter(items,q.value),s.value))}
+    sync();
   </script>
 </body>
 </html>
