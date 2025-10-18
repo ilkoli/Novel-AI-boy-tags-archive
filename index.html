@@ -1,169 +1,90 @@
 <!doctype html>
-
 <html lang="ko">
-
 <head>
-
   <meta charset="utf-8" />
-
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <title>Novel AI 남캐 태그 아카이브</title>
-
   <style>
-
     :root { --bg:#0b0c10; --panel:#121318; --text:#e8e8e8; --muted:#a7a7a7; --accent:#71c9f8; --fav:#ffd166; --card:#161922; --card2:#1b1f2a; --shadow:0 10px 30px rgba(0,0,0,.35); }
-
     *{box-sizing:border-box}
-
     html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Noto Sans KR,Apple SD Gothic Neo,sans-serif}
-
     header{position:sticky;top:0;z-index:5;background:linear-gradient(180deg,var(--bg),rgba(11,12,16,.85));backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid #1c1f29}
-
     .wrap{max-width:1100px;margin:0 auto;padding:20px}
-
     .title{display:flex;align-items:center;gap:10px}
-
     .title h1{margin:0;font-size:20px;font-weight:700}
-
-    .controls{display:grid;gap:10px;margin-top:12px;grid-template-columns:1fr;grid-template-areas:"q" "sort" "reset"}
-
+    .desc{margin-top:8px;color:var(--muted);font-size:14px;line-height:1.6}
+    .controls{display:grid;gap:10px;margin-top:20px;grid-template-columns:1fr;grid-template-areas:"q" "sort" "reset"}
     .controls .q{grid-area:q}
-
     .controls .sort{grid-area:sort}
-
     .controls .reset{grid-area:reset}
-
     .controls input,.controls select,.controls button{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2a2f3b;background:var(--panel);color:var(--text)}
-
     .controls input::placeholder{color:var(--muted)}
-
     .controls button{cursor:pointer;border-color:#2f3b47}
-
     @media(min-width:700px){.controls{grid-template-columns:1fr 180px 140px;grid-template-areas:"q sort reset"}}
-
     main{padding:24px 0}
-
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
-
     @media(max-width:640px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-
     .card{position:relative;background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid #22293a;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);transition:box-shadow .2s ease,border-color .2s ease}
-
     .card.isFav{border-color:#8a6f2a;box-shadow:0 0 0 2px rgba(255,209,102,.2),var(--shadow)}
-
     .favBtn{position:absolute;left:8px;top:8px;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;border:1px solid #2a2f3b;background:rgba(10,12,18,.75);color:#6b7a8d;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:transform .12s ease,background .2s ease,color .2s ease,border-color .2s ease}
-
     .favBtn:active{transform:scale(.92)}
-
     .favBtn[aria-pressed="true"]{background:rgba(255,209,102,.2);color:var(--fav);border-color:#8a6f2a;box-shadow:0 0 0 2px rgba(255,209,102,.2),0 6px 16px rgba(0,0,0,.35)}
-
     .favBtn svg{pointer-events:none}
-
     .thumb{aspect-ratio:1/1;display:block;width:100%;object-fit:cover;background:#0d0f14}
-
     .meta{padding:10px 12px;border-top:1px solid #22293a}
-
     .meta .name{font-size:14px;font-weight:600}
-
     .copyBtn{position:absolute;right:8px;bottom:8px;padding:7px 10px;border-radius:10px;border:1px solid #2a2f3b;background:rgba(10,12,18,.75);backdrop-filter:blur(4px);color:#dff2ff;cursor:pointer}
-
     .copyBtn:hover{outline:1px solid var(--accent)}
-
     .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#0f1724;border:1px solid #2a3651;color:#cfe9ff;padding:10px 14px;border-radius:12px;opacity:0;transition:.25s;pointer-events:none}
-
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
     .empty{color:var(--muted);text-align:center;padding:40px;border:1px dashed #2b3241;border-radius:12px}
-
   </style>
-
 </head>
-
 <body>
-
   <header>
-
     <div class="wrap">
-
       <div class="title">
-
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l2.39 4.84 5.34.78-3.86 3.76.91 5.31L12 15.77 6.22 17.7l.91-5.31L3.27 8.62l5.34-.78L12 3z" stroke="#71c9f8"/></svg>
-
         <h1>Novel AI 남캐 태그 아카이브</h1>
-
       </div>
-
+      <p class="desc">설명란입니다</p>
       <div class="controls">
-
         <input class="q" id="q" placeholder="검색" />
-
         <select class="sort" id="sort">
-
           <option value="original">기본순</option>
-
           <option value="titleAsc">제목 A→Z</option>
-
           <option value="titleDesc">제목 Z→A</option>
-
         </select>
-
         <button class="reset" id="reset">초기화</button>
-
       </div>
-
     </div>
-
   </header>
 
   <main class="wrap">
-
     <div id="grid" class="grid"></div>
-
     <div id="empty" class="empty" hidden>검색 결과가 없어요.</div>
-
   </main>
 
   <div id="toast" class="toast"></div>
 
   <script>
-
     const items=[
-
       {id:'img-001',title:'Neon Alley',img:'https://images.unsplash.com/photo-1520975916090-3105956dac38?q=80&w=800&auto=format&fit=crop',copyText:'neon alley'},
-
       {id:'img-002',title:'Desert Dunes',img:'https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800&auto=format&fit=crop',copyText:'Desert Dunes'},
-
       {id:'img-003',title:'Forest Shrine',img:'https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop',copyText:'Forest Shrine'},
-
       {id:'img-004',title:'Harbor Night',img:'https://images.unsplash.com/photo-1505765050516-f72dcac9c60e?q=80&w=800&auto=format&fit=crop',copyText:'Harbor Night'}
-
     ];
-
     const g=document.getElementById('grid'),e=document.getElementById('empty'),q=document.getElementById('q'),s=document.getElementById('sort'),r=document.getElementById('reset'),t=document.getElementById('toast');
-
     const st=(()=>{try{const k='__chk__';localStorage.setItem(k,'1');localStorage.removeItem(k);return localStorage}catch(e){let m={};return{getItem:k=>m[k]||null,setItem:(k,v)=>m[k]=v,removeItem:k=>delete m[k]}}})();
-
     const K='gallery:favorites',parse=s=>{try{return JSON.parse(s)}catch{return[]}},get=()=>new Set(parse(st.getItem(K)||'[]')),set=v=>st.setItem(K,JSON.stringify([...v]));
-
     const idx=new Map(items.map((it,i)=>[it.id,i]));
-
     function render(list){const favs=get();g.innerHTML='';list.forEach(it=>{const c=document.createElement('article');c.className='card'+(favs.has(it.id)?' isFav':'');c.innerHTML=`<button class="favBtn" aria-pressed="${favs.has(it.id)}" data-id="${it.id}"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button><img class="thumb" src="${it.img}" alt="${it.title}"/><button class="copyBtn" data-clip="${it.copyText}">복사</button><div class="meta"><div class="name">${it.title}</div></div>`;g.appendChild(c)});e.hidden=list.length!==0;}
-
     function sortItems(list,mode){const favs=get(),fa=[],na=[];list.forEach(i=>(favs.has(i.id)?fa:na).push(i));const cmp=(a,b)=>a.title.localeCompare(b.title,'ko',{numeric:true,sensitivity:'base'}),orig=(a,b)=>idx.get(a.id)-idx.get(b.id),sort=arr=>mode==='original'?arr.sort(orig):mode==='titleAsc'?arr.sort(cmp):mode==='titleDesc'?arr.sort((a,b)=>cmp(b,a)):arr;return[...sort(fa),...sort(na)];}
-
     function filter(list,k){const kw=k.toLowerCase().trim();return kw?list.filter(i=>i.title.toLowerCase().includes(kw)):list;}
-
     async function copyTx(tx){try{await navigator.clipboard.writeText(tx);toast('복사 완료!')}catch{toast('복사 실패')}}function toast(m){t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1200);}
-
     g.addEventListener('click',ev=>{const b=ev.target.closest('.copyBtn');if(b){copyTx(b.dataset.clip);return}const s=ev.target.closest('.favBtn');if(s){const f=get(),id=s.dataset.id;f.has(id)?f.delete(id):f.add(id);set(f);sync()}});
-
     q.addEventListener('input',sync);s.addEventListener('change',sync);r.addEventListener('click',()=>{q.value='';s.value='original';sync()});
-
     function sync(){render(sortItems(filter(items,q.value),s.value))}sync();
-
   </script>
-
 </body>
-
 </html>
