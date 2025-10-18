@@ -31,14 +31,12 @@ header{background:linear-gradient(180deg,var(--bg),rgba(11,12,16,.85));backdrop-
   padding:16px 20px 10px;
   border-bottom:1px solid #1c1f29;
 }
-.controls{display:grid;gap:10px;grid-template-columns:1fr;grid-template-areas:"q" "sort" "reset"}
+.controls{display:grid;gap:10px;grid-template-columns:1fr 180px;grid-template-areas:"q sort"}
 .controls .q{grid-area:q}
 .controls .sort{grid-area:sort}
-.controls .reset{grid-area:reset}
-.controls input,.controls select,.controls button{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2a2f3b;background:var(--panel);color:var(--text)}
+.controls input,.controls select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2a2f3b;background:var(--panel);color:var(--text)}
 .controls input::placeholder{color:var(--muted)}
-.controls button{cursor:pointer;border-color:#2f3b47}
-@media(min-width:700px){.controls{grid-template-columns:1fr 180px 140px;grid-template-areas:"q sort reset"}}
+@media(min-width:700px){.controls{grid-template-columns:1fr 180px;grid-template-areas:"q sort"}}
 
 main{padding:24px 0}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
@@ -88,7 +86,6 @@ main{padding:24px 0}
       남성 캐릭터 작가 태그 샘플 아카이브입니다.<br>
       각 카드의 ‘복사’ 버튼으로 태그를 바로 복사할 수 있어요.<br>
       각 카드 좌상단의 '즐겨찾기' 버튼으로 상단 고정을 할 수 있어요.<br>
-      초기화 버튼은 카드 정렬을 초기화 시켜요. 즐겨찾기는 유지돼요.<br>
       오류 및 개선 제보 → 트위터 @ilkoli_AI
     </p>
     <details class="toggle">
@@ -117,7 +114,6 @@ main{padding:24px 0}
         <option value="titleAsc">제목 A→Z</option>
         <option value="titleDesc">제목 Z→A</option>
       </select>
-      <button class="reset" id="reset">초기화</button>
     </div>
   </div>
 </div>
@@ -131,29 +127,11 @@ main{padding:24px 0}
 <div id="toast" class="toast"></div>
 
 <script>
-const items=[
-  {id:'img-001',title:'itzah',img:'https://i.postimg.cc/nh7jShMy/001.png',copyText:'itzah'},
-  {id:'img-002',title:'raikoart',img:'https://i.postimg.cc/V6HkLxdS/002.png',copyText:'raikoart'},
-  {id:'img-003',title:'sciamano240',img:'https://i.postimg.cc/43ydk43C/sciamano240.png',copyText:'sciamano240'},
-  {id:'img-004',title:'kittew',img:'https://i.postimg.cc/vHyZ8tm3/kittew.png',copyText:'kittew'},
-  {id:'img-005',title:'konya karasue',img:'https://i.postimg.cc/y8dBWQCP/konya-karasue.png',copyText:'konya karasue'},
-  {id:'img-006',title:'albino (a1b1n0623)',img:'https://i.postimg.cc/sXpCbb5r/albino-a1b1n0623.png',copyText:'albino (a1b1n0623)'},
-  {id:'img-007',title:'ai shou',img:'https://i.postimg.cc/5yCn2FxV/ai-shou.png',copyText:'ai shou'},
-  {id:'img-008',title:'almualim',img:'https://i.postimg.cc/FKCZbxzv/almualim.png',copyText:'almualim'},
-  {id:'img-009',title:'asatani tomoyo',img:'https://i.postimg.cc/Kv4mJG0h/asatani-tomoyo.png',copyText:'asatani tomoyo'},
-  {id:'img-010',title:'mizumizuni',img:'https://i.postimg.cc/5t5J662m/mizumizuni.png',copyText:'mizumizuni'},
-  {id:'img-011',title:'4qw5',img:'https://i.postimg.cc/jSbtKHRk/4qw5.png',copyText:'4qw5'},
-  {id:'img-012',title:'blushyspicy',img:'https://i.postimg.cc/TwpXQQcR/blushyspicy.png',copyText:'blushyspicy'},
-  {id:'img-013',title:'centurii-chan',img:'https://i.postimg.cc/SRkfk1tG/centurii-chan.png',copyText:'centurii-chan'},
-  {id:'img-014',title:'bbc-chan',img:'https://i.postimg.cc/4N4Q0M90/bbc-chan.png',copyText:'bbc-chan'},
-  {id:'img-015',title:"k-rha's",img:'https://i.postimg.cc/BnXcSKNV/k-rha-s.png',copyText:"k-rha's"},
-  {id:'img-016',title:'77gl',img:'https://i.postimg.cc/Y9w1zy7P/77gl.png',copyText:'77gl'},
-];
+const items=[/* 네 기존 이미지 배열 그대로 */];
 
 const g=document.getElementById('grid'),e=document.getElementById('empty'),
       q=document.getElementById('q'),s=document.getElementById('sort'),
-      r=document.getElementById('reset'),t=document.getElementById('toast'),
-      toTop=document.getElementById('toTop');
+      t=document.getElementById('toast'),toTop=document.getElementById('toTop');
 
 const st=(()=>{try{const k='__chk__';localStorage.setItem(k,'1');localStorage.removeItem(k);return localStorage}catch(e){let m={};return{getItem:k=>m[k]||null,setItem:(k,v)=>m[k]=v,removeItem:k=>delete m[k]}}})();
 const K='gallery:favorites',parse=s=>{try{return JSON.parse(s)}catch{return[]}},get=()=>new Set(parse(st.getItem(K)||'[]')),set=v=>st.setItem(K,JSON.stringify([...v]));
@@ -202,10 +180,10 @@ g.addEventListener('click',ev=>{
 });
 q.addEventListener('input',sync);
 s.addEventListener('change',sync);
-r.addEventListener('click',()=>{q.value='';s.value='original';sync()});
+
 function sync(){render(sortItems(filter(items,q.value),s.value))} sync();
 
-/* 위로가기 버튼 표시/동작 */
+/* 위로가기 버튼 */
 window.addEventListener('scroll',()=>{
   if(window.scrollY>300) toTop.classList.add('show');
   else toTop.classList.remove('show');
